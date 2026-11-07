@@ -1,0 +1,19 @@
+# VoidMap Changelog
+
+## 0.2.0
+
+The map gets a window of its own.
+
+- **New window, same map.** VoidMap now has its own window, title bar, toolbar and footer. Inside it is the full world map with every pin, from Blizzard and from your other addons.
+- **World / Continent / Zone navigation** with a menu at each level to pick another map, plus a **Floor** picker on maps with levels.
+- **Filter and Pin**: Blizzard's map filters and map-pin button, in VoidMap's toolbar. **Zoom** buttons.
+- **Your quests beside the map**, the ones on the map you're looking at first. Hover for objectives (the quest lights up on the map), shift-click to link it, right-click to stop tracking it. Replaces Blizzard's quest log panel. **L** opens the map with the list.
+- **Read the whole quest:** click a quest in the list for its objectives, full text and rewards, with Track, Share and Abandon. Ctrl-click tracks it straight away.
+- **Fold the quest list away** with the arrow tab on the map's right edge (or the Quests button), like Blizzard's map.
+- **Drag the corner to size the window.** The map keeps its shape. **Big / Small** switch.
+- **Coordinates** for you and the cursor at the bottom. With TomTom installed, TomTom's map coordinates are hidden because they'd show twice.
+- **Trails:** VoidMap records the paths you walk, for VoidGPS's walking routes. Count at the bottom right; you can turn it off in Settings.
+
+## 0.1.0
+
+First version (not released): moved and sized Blizzard's map window.
