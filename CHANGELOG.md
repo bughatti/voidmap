@@ -1,5 +1,9 @@
 # VoidMap Changelog
 
+## 0.2.1
+
+- **Fixed:** a flood of Lua errors from trail recording during fights, when the game hides your movement speed. VoidMap now pauses recording until it can read it again.
+
 ## 0.2.0
 
 The map gets a window of its own.

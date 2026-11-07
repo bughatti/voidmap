@@ -144,6 +144,9 @@ local function sample()
     if not cont then last = nil; return end   -- (a loading screen mid-ride keeps the ride)
     local now = GetTime()
     local speed = GetUnitSpeed("player") or 0
+    -- the game can hand back a secret speed (seen 2026-11-07, 1,668 errors while fighting):
+    -- no speed means no way to tell walking from a ride, so skip it and restart the line after
+    if issecretvalue and issecretvalue(speed) then last = nil; return end
     if ride and now - (ride.moved or ride.t) > 60 and speed == 0 then ride = nil end   -- wasn't a ride
     if last and last.cont == cont then
         -- speed between this sample and the previous one (both always updated together)
