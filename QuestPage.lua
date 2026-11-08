@@ -220,16 +220,43 @@ M:OnReady(function()
         if idx and QuestLogPushQuest then QuestLogPushQuest(idx) end
     end, { "Share", "Offer this quest to your group." })
     page.share:SetPoint("LEFT", page.track, "RIGHT", 6, 0)
+    -- Blizzard's own flow (QuestMapQuestOptions_AbandonQuest): select, mark, ask (the items
+    -- version when the quest carries items), then put the old selection back. Leaving the
+    -- abandoned quest selected is what the old version did.
     page.abandon = U.Button(page, "|cffff6060Abandon|r", 70, 20, function()
         if not qid then return end
-        local info = C_QuestLog.GetInfo(C_QuestLog.GetLogIndexForQuestID(qid) or 0)
+        local old = C_QuestLog.GetSelectedQuest()
         C_QuestLog.SetSelectedQuest(qid)
         C_QuestLog.SetAbandonQuest()
-        StaticPopup_Show("ABANDON_QUEST", info and info.title or "")   -- Blizzard's own "are you sure?"
+        local title = safe(C_QuestLog.GetTitleForQuestID, C_QuestLog.GetAbandonQuest()) or ""
+        local names = {}
+        for _, item in ipairs(safe(C_QuestLog.GetAbandonQuestItems) or {}) do
+            local n = C_Item and C_Item.GetItemNameByID and safe(C_Item.GetItemNameByID, item)
+            if n then names[#names + 1] = n end
+        end
+        if #names > 0 then
+            StaticPopup_Hide("ABANDON_QUEST")
+            StaticPopup_Show("ABANDON_QUEST_WITH_ITEMS", title, table.concat(names, ", "))
+        else
+            StaticPopup_Hide("ABANDON_QUEST_WITH_ITEMS")
+            StaticPopup_Show("ABANDON_QUEST", title)
+        end
+        C_QuestLog.SetSelectedQuest(old or 0)
     end, { "Abandon", "Asks first (Blizzard's own confirmation)." })
     page.abandon:SetPoint("BOTTOMRIGHT", -8, 8)
 
     local ev = CreateFrame("Frame")
     for _, e in ipairs({ "QUEST_LOG_UPDATE", "SUPER_TRACKING_CHANGED", "GROUP_ROSTER_UPDATE" }) do pcall(ev.RegisterEvent, ev, e) end
-    ev:SetScript("OnEvent", function() if page:IsShown() then P:Render() end end)
+    ev:SetScript("OnEvent", function()
+        if not page:IsShown() then return end
+        -- the quest left the log (abandoned, turned in): back to the list, like Blizzard's own
+        -- details panel (QuestMapFrame_ReturnFromQuestDetails)
+        if qid and not safe(C_QuestLog.GetLogIndexForQuestID, qid) then
+            qid = nil
+            P:Hide()
+            if ns.Quests and ns.Quests.Refresh then ns.Quests:Refresh() end
+            return
+        end
+        P:Render()
+    end)
 end)

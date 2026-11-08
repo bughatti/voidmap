@@ -55,6 +55,7 @@ f:RegisterEvent("PLAYER_LOGIN")
 f:SetScript("OnEvent", function(_, event, name)
     if event == "ADDON_LOADED" and name == ADDON then
         VoidMapDB = VoidMapDB or {}
+        VoidMapDB.showTrace = nil   -- the 2026-11-07 right-click trace's data
         VoidMapDB.config = VoidMapDB.config or {}
         local c = VoidMapDB.config
         for k, v in pairs(M.DEFAULTS) do

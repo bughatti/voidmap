@@ -1,5 +1,9 @@
 # VoidMap Changelog
 
+## 0.2.2
+
+- **Fixed: abandoning a quest from its page.** The page now goes back to your quest list once the quest is gone (it used to sit on "no longer in your log"), and opening another quest right after works without closing the map. Abandon also warns about the quest's items, like the game's own button.
+
 ## 0.2.1
 
 - **Fixed:** a flood of Lua errors from trail recording during fights, when the game hides your movement speed. VoidMap now pauses recording until it can read it again.
