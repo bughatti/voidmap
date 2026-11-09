@@ -1,5 +1,7 @@
 # VoidMap
 
+**Works on:** WoW Midnight · WoW Forever
+
 **The world map in a window of its own: everything Blizzard's map does, in the Void look, with your quests beside it.**
 
 VoidMap gives the world map its own window. You keep the full navigation, the filters, the zoom, and every pin from Blizzard and from your other addons. The window, the buttons and the quest list are VoidMap's own.
@@ -36,7 +38,8 @@ VoidMap gives the world map its own window. You keep the full navigation, the fi
 
 ## Compatibility
 
-- **WoW 12.1.5** (Midnight Season 2) and **WoW Forever**
+- **WoW Midnight** 12.1.5 (Season 2)
+- **WoW Forever**
 - Standalone: nothing else to install
 - Works in combat: the world map has no protected parts, so the window never blocks an action
 - With **TomTom**, VoidMap hides TomTom's coordinates on the map, because VoidMap shows its own at the bottom. TomTom's waypoints and arrow are unchanged
