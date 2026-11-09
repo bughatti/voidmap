@@ -166,6 +166,10 @@ function M.ShowQuest(id)
         if InCombatLockdown() or not OpenWorldMap then return false end   -- the game won't open it in combat
         OpenWorldMap(mapID and mapID > 0 and mapID or nil)
         if not W:IsShown() then return false end
+    elseif mapID and mapID > 0 and W.GetMapID and W:GetMapID() ~= mapID and W.SetMapID then
+        -- already open: go to this quest's zone too (the user, 2026-11-09: right-clicking a second
+        -- quest showed its page but left the map on the first quest's zone)
+        pcall(W.SetMapID, W, mapID)
     end
     if ns.Frame then ns.Frame:Layout() end
     return P:Show(id)

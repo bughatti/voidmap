@@ -1,5 +1,9 @@
 # VoidMap Changelog
 
+## 0.2.5
+
+- **Fixed: right-clicking another quest in VoidQuest now moves the map too.** With the map already open, the quest's page changed but the map stayed on the first quest's zone.
+
 ## 0.2.4
 
 - **Fixed: box borders missing a side.** Depending on where a window sat on screen, its left, right or bottom line could vanish. Borders are now exactly one screen pixel and can't round away.
