@@ -1,5 +1,9 @@
 # VoidMap Changelog
 
+## 0.2.4
+
+- **Fixed: box borders missing a side.** Depending on where a window sat on screen, its left, right or bottom line could vanish. Borders are now exactly one screen pixel and can't round away.
+
 ## 0.2.3
 
 - **Room for plug-ins:** another Void addon can now add a button to VoidMap's title bar and use the side area beside the map. The first one is VoidDungeon (coming soon): dungeon maps, quests, loot and boss tips for WoW Forever, right inside VoidMap. Nothing changes if you don't have it.
