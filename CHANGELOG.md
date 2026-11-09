@@ -1,5 +1,9 @@
 # VoidMap Changelog
 
+## 0.2.3
+
+- **Room for plug-ins:** another Void addon can now add a button to VoidMap's title bar and use the side area beside the map. The first one is VoidDungeon (coming soon): dungeon maps, quests, loot and boss tips for WoW Forever, right inside VoidMap. Nothing changes if you don't have it.
+
 ## 0.2.2
 
 - **Fixed: abandoning a quest from its page.** The page now goes back to your quest list once the quest is gone (it used to sit on "no longer in your log"), and opening another quest right after works without closing the map. Abandon also warns about the quest's items, like the game's own button.

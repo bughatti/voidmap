@@ -37,9 +37,17 @@ function M:Print(msg)
 end
 
 local readyFns = {}
-function M:OnReady(fn) readyFns[#readyFns + 1] = fn end
-
 local started
+-- Run fn once the map exists (now, if it already does: a plugin addon may register late).
+function M:OnReady(fn)
+    if started then
+        local ok, err = pcall(fn)
+        if not ok then geterrorhandler()(err) end
+        return
+    end
+    readyFns[#readyFns + 1] = fn
+end
+
 local function start()
     if started or not WorldMapFrame then return end
     started = true

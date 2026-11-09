@@ -30,7 +30,9 @@ local W                          -- WorldMapFrame
 local applying, sizing
 local ui = {}                    -- our chrome
 
-local function sideW() return M:Config().questPanel and F.SIDE_W or 0 end
+-- A plugin (VoidDungeon's dungeon view) can borrow the side area: M:SetSideOwner(frame).
+local function sideW() return (M:Config().questPanel or M.sideOwner) and F.SIDE_W or 0 end
+M.layout = { title = TITLE_H, tool = TOOL_H, foot = FOOT_H, pad = PAD, side = F.SIDE_W }
 -- Keep a Blizzard piece hidden without moving it: Blizzard's code still calls it and
 -- asks it for its parent (moving it under another frame broke the map on open), so it
 -- stays where it is and hides again whenever anything shows it.
@@ -122,9 +124,40 @@ function F:Layout()
         ui.sideTab:SetPoint("RIGHT", sc, "RIGHT", 0, 0)
         -- the texture points down; turned to point right (fold away) or left (bring back)
         ui.sideTab.arrow:SetRotation(side > 0 and math.pi / 2 or -math.pi / 2)
+        ui.sideTab:SetShown(not M.sideOwner)
     end
-    if ns.Quests then ns.Quests:Place(side > 0, TITLE_H + TOOL_H, FOOT_H, PAD) end
+    local owner = M.sideOwner
+    if ns.Quests then ns.Quests:Place(side > 0 and not owner, TITLE_H + TOOL_H, FOOT_H, PAD) end
+    if owner then
+        owner:ClearAllPoints()
+        owner:SetPoint("TOPRIGHT", W, "TOPRIGHT", -PAD, -(TITLE_H + TOOL_H))
+        owner:SetPoint("BOTTOMRIGHT", W, "BOTTOMRIGHT", -PAD, FOOT_H)
+        owner:SetWidth(F.SIDE_W - PAD)
+        owner:Show()
+    end
     applying = false
+end
+
+-- Plugins: borrow the side area (nil gives it back to the quest list).
+function M:SetSideOwner(frame)
+    if self.sideOwner and self.sideOwner ~= frame then self.sideOwner:Hide() end
+    self.sideOwner = frame
+    if W then F:Layout() end
+end
+
+-- Plugins: a title-bar button, left of the others. Returns the button.
+function M:AddTitleButton(label, tip, onClick)
+    if not ui.title then return end
+    local b = U.Button(ui.title, label, nil, 18, onClick, tip)
+    b:SetPoint("RIGHT", ui.titleLeftmost, "LEFT", -4, 0)
+    ui.titleLeftmost = b
+    return b
+end
+
+-- Plugins: replace the title's map name (nil = back to the map's name).
+function M:SetTitleOverride(text)
+    self.titleOverride = text
+    if W then F:RefreshNav() end
 end
 
 -- Remember the window's top-left corner (screen pixels) and its size without the quest list.
@@ -263,7 +296,7 @@ function F:RefreshNav()
     end
 
     local mi = mapID and C_Map.GetMapInfo(mapID)
-    ui.titleText:SetText("|cff00c7ffVoidMap|r   " .. (mi and mi.name or ""))
+    ui.titleText:SetText("|cff00c7ffVoidMap|r   " .. (M.titleOverride or (mi and mi.name) or ""))
 end
 
 ----------------------------------------------------------------------
@@ -399,6 +432,7 @@ local function build()
         function() F:ToggleBig() end, ui.gear)
     ui.questBtn = tbtn("Quests", { "Quest list", "Show or hide your quests beside the map." },
         function() F:ToggleQuests() end, ui.bigBtn)
+    ui.titleLeftmost = ui.questBtn
 
     -- toolbar
     local tool = CreateFrame("Frame", nil, W)
