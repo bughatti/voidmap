@@ -1,5 +1,10 @@
 # VoidMap Changelog
 
+## 0.2.6
+
+- **Quest rewards show their tooltip.** On a quest's page, hover a reward item to see what it is, with your equipped item beside it to compare. Shift-click links it in chat, Ctrl-click tries it on. Reward names are colored by quality.
+- **The Void hub button on the minimap opens one panel now:** every Void addon you have, by name, grouped by what it helps with, with its on/off switches right under it. A **Background** slider makes the panel see-through. On WoW Forever, Void addons that do nothing there are left out.
+
 ## 0.2.5
 
 - **Fixed: right-clicking another quest in VoidQuest now moves the map too.** With the map already open, the quest's page changed but the map stayed on the first quest's zone.

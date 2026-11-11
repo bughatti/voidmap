@@ -64,19 +64,65 @@ local function rewardsOf(id)
     if xp and not secret(xp) and xp > 0 then bits[#bits + 1] = ("%s XP"):format(BreakUpLargeNumbers and BreakUpLargeNumbers(xp) or xp) end
     if money and not secret(money) and money > 0 and GetCoinTextureString then bits[#bits + 1] = GetCoinTextureString(money) end
     if #bits > 0 then out[#out + 1] = table.concat(bits, "    ") end
-    local function items(count, info, label)
+    local function items(count, info, label, kind)
         local n = safe(count, id) or 0
         if n > 0 and label then out[#out + 1] = label end
         for i = 1, n do
-            local name, tex, num = safe(info, i, id)
+            local name, tex, num, quality = safe(info, i, id)
             if name and not secret(name) then
-                out[#out + 1] = ("|T%s:16:16:0:0|t %s%s"):format(tex or 134400, name, (num and num > 1) and (" x" .. num) or "")
+                local c = type(quality) == "number" and ITEM_QUALITY_COLORS and ITEM_QUALITY_COLORS[quality]
+                if c and c.hex then name = c.hex .. name .. "|r" end
+                -- kind + index: the row gets a hover area with the item's tooltip (rewardItem)
+                out[#out + 1] = { text = ("|T%s:16:16:0:0|t %s%s"):format(tex or 134400, name, (num and num > 1) and (" x" .. num) or ""),
+                    kind = kind, index = i }
             end
         end
     end
-    items(GetNumQuestLogRewards, GetQuestLogRewardInfo)
-    items(GetNumQuestLogChoices, GetQuestLogChoiceInfo, "|cffffd200Choose one:|r")
+    items(GetNumQuestLogRewards, GetQuestLogRewardInfo, nil, "reward")
+    items(GetNumQuestLogChoices, GetQuestLogChoiceInfo, "|cffffd200Choose one:|r", "choice")
     return out
+end
+
+-- Hover areas over reward rows: the item's tooltip (with the compare tooltip, like Blizzard's
+-- quest log, QuestInfoRewardItemMixin:OnEnter), shift-click links it, ctrl-click tries it on.
+-- (the user, 2026-11-11: "items you get from the quest, they dont show a tooltip")
+local hovers = {}
+local function itemLink(self) return safe(GetQuestLogItemLink, self.kind, self.index, qid) end
+local function hoverEnter(self)
+    if not qid then return end
+    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+    local ok = pcall(GameTooltip.SetQuestLogItem, GameTooltip, self.kind, self.index, qid)
+    if not ok or GameTooltip:NumLines() == 0 then
+        local link = itemLink(self)
+        if link then pcall(GameTooltip.SetHyperlink, GameTooltip, link) end
+    end
+    if GameTooltip:NumLines() == 0 then GameTooltip:Hide(); return end
+    if GameTooltip_ShowCompareItem then pcall(GameTooltip_ShowCompareItem, GameTooltip) end
+    GameTooltip:Show()
+    self.UpdateTooltip = hoverEnter   -- pressing shift redraws (compare), like Blizzard's
+end
+local function hoverLeave(self)
+    self.UpdateTooltip = nil
+    GameTooltip:Hide()
+end
+local function hoverClick(self)
+    local link = itemLink(self)
+    if link and HandleModifiedItemClick then HandleModifiedItemClick(link) end
+end
+local function hoverFor(i, fs, row)
+    local h = hovers[i]
+    if not h then
+        h = CreateFrame("Button", nil, child)
+        h:SetScript("OnEnter", hoverEnter)
+        h:SetScript("OnLeave", hoverLeave)
+        h:SetScript("OnClick", hoverClick)
+        hovers[i] = h
+    end
+    h.kind, h.index = row.kind, row.index
+    h:ClearAllPoints()
+    h:SetPoint("TOPLEFT", fs, "TOPLEFT", 0, 1)
+    h:SetSize(math.min(fs:GetWidth(), fs:GetStringWidth() + 4), math.max(16, fs:GetStringHeight() + 2))
+    h:Show()
 end
 
 function P:Render()
@@ -92,6 +138,7 @@ end
 
 function P:Draw()
     for i = 1, #lines do lines[i]:Hide() end
+    for i = 1, #hovers do hovers[i]:Hide() end
     P.n, y = 0, -2
     local idx = safe(C_QuestLog.GetLogIndexForQuestID, qid)
     local info = idx and safe(C_QuestLog.GetInfo, idx)
@@ -128,7 +175,16 @@ function P:Draw()
     local rw = rewardsOf(qid)
     if #rw > 0 then
         head("Rewards")
-        for _, l in ipairs(rw) do add(l, 11, 0.92, 0.92, 0.95, 4) end
+        local nh = 0
+        for _, l in ipairs(rw) do
+            if type(l) == "table" then
+                local fs = add(l.text, 11, 0.92, 0.92, 0.95, 4)
+                nh = nh + 1
+                hoverFor(nh, fs, l)
+            else
+                add(l, 11, 0.92, 0.92, 0.95, 4)
+            end
+        end
     end
     child:SetHeight(-y + 8)
     page.track:SetLabel(C_SuperTrack.GetSuperTrackedQuestID() == qid and "Tracking" or "Track")
