@@ -1,5 +1,9 @@
 # VoidMap Changelog
 
+## 0.2.8 — 2026-11-12
+
+- **Fixed: a side of a box could be missing**, e.g. the right line of the recipes box and its buttons when the game window is an odd number of pixels wide. Every Void box now always shows all four border lines.
+
 ## 0.2.7 — 2026-11-12
 
 - **With VoidQuest on WoW Forever: the quest page says when an item comes from another quest** (Catch of the Day: the Bloodbelly Fish come from Jinar'Zillen's "Fish in a Bucket").
