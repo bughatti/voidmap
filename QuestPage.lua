@@ -166,6 +166,11 @@ function P:Draw()
         y = y - 6
     end
     if todo and not secret(todo) and todo ~= "" then add(todo, 11, 1, 1, 1, 12) end
+    -- with VoidQuest on WoW Forever: an item this quest needs comes from another quest (the user,
+    -- 2026-11-12: Catch of the Day's fish come from Jinar'Zillen's "Fish in a Bucket")
+    local VQF = VoidQuest and VoidQuest.Forever
+    local src = VQF and VQF.ItemSourceNote and safe(VQF.ItemSourceNote, VQF, qid)
+    if src then add(src, 11, 1, 0.82, 0, 12) end
 
     if desc and not secret(desc) and desc ~= "" then
         head("Description")

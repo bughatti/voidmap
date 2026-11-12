@@ -1,4 +1,4 @@
-# VoidMap
+# VoidMap - Movable World Map
 
 **Works on:** WoW Midnight · WoW Forever
 
@@ -26,6 +26,10 @@ VoidMap gives the world map its own window. You keep the full navigation, the fi
 - **Big** fills most of the screen, **Small** goes back to your size
 - **Scale** and **map opacity** (see the world through the map), Blizzard's **fade while moving**
 - **Coordinates** for you and the cursor at the bottom
+
+### Explore Azeroth (WoW Forever)
+- **Explore** in the title bar shows your progress toward **Explore Azeroth**, which gives a Legacy point: zones explored per continent, the areas of the zone you're looking at that you haven't discovered (click one for the way there), and every zone of the continent with its count (click to open its map)
+- While it's open, the map marks each area you haven't discovered yet
 
 ### Trails (for VoidGPS)
 - VoidMap records the paths you walk and ride (not flying, taxis, boats or instances), for all your characters. **VoidGPS** will use them to plan walking routes around mountains and cliffs instead of in straight lines

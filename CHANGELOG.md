@@ -1,5 +1,12 @@
 # VoidMap Changelog
 
+## 0.2.7 — 2026-11-12
+
+- **With VoidQuest on WoW Forever: the quest page says when an item comes from another quest** (Catch of the Day: the Bloodbelly Fish come from Jinar'Zillen's "Fish in a Bucket").
+- **WoW Forever: Explore view.** The new **Explore** button in the title bar shows your progress toward **Explore Azeroth** (a Legacy point): zones explored per continent, the zone you're looking at with the areas you haven't discovered (click one for the way there), and every zone of the continent with its count (click to open its map). While it's open, the map marks each area you haven't discovered.
+- **The settings window can be dragged and stays where you put it**, even after a restart.
+- The Void hub's info window now stays where you put it.
+
 ## 0.2.6
 
 - **Quest rewards show their tooltip.** On a quest's page, hover a reward item to see what it is, with your equipped item beside it to compare. Shift-click links it in chat, Ctrl-click tries it on. Reward names are colored by quality.
