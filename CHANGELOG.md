@@ -1,5 +1,9 @@
 # VoidMap Changelog
 
+## 0.2.9 — 2026-11-13
+
+- **Fixed: "Interface action failed because of an AddOn" when you open the map in a fight.** After the map had been moved to another zone by an add-on (a quest list, a search box, Big / Small, the zoom buttons), opening it in combat made the game block part of placing each quest pin and name VoidMap (or another add-on) as the cause. VoidMap now keeps map pins from doing that in combat, whichever add-on touched the map first, and simply opening the map no longer leaves that trace in the first place.
+
 ## 0.2.8 — 2026-11-12
 
 - **Fixed: a side of a box could be missing**, e.g. the right line of the recipes box and its buttons when the game window is an odd number of pixels wide. Every Void box now always shows all four border lines.

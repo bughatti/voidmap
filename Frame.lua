@@ -12,7 +12,9 @@
 --   * keep Blizzard's filter and map-pin buttons (their menus and behavior),
 --     moved into our toolbar and drawn in our style
 --   * size and place the frame ourselves after Blizzard does (post-hooks only)
--- The world map has no protected parts, so none of this can block an action.
+-- The world map has no protected frames, BUT pin setup calls SetPassThroughButtons (blocked in
+-- combat when tainted): run Blizzard's map code from ours as little as possible (F:FitCanvas), and
+-- PinGuard.lua keeps the rest from blocking.
 ----------------------------------------------------------------------
 local _, ns = ...
 local M = ns.M
@@ -45,6 +47,38 @@ end
 ----------------------------------------------------------------------
 -- Size and place
 ----------------------------------------------------------------------
+-- The map picture (Blizzard's ScrollContainer) gets an explicit size of its own (one TOPLEFT
+-- point + SetSize), not two points on the window. Why: W:OnFrameSizeChanged() called from addon
+-- code runs Blizzard's zoom code tainted, and the zoom values it writes (baseScale, zoomLevels,
+-- currentScale, targetScale) then carry VoidMap's taint. Opening the map in combat (M) re-reads
+-- them while placing quest pins, and the game blocked pin:SetPassThroughButtons() as VoidMap's
+-- (2026-11-12, confirmed with issecurevariable). Before, Blizzard resized the window on every
+-- open, the picture followed, and we re-told the canvas each time = tainted on every open.
+-- Now Blizzard's resize doesn't touch the picture, Blizzard's own (secure) zoom code on open sees
+-- the right size, and we tell the canvas only when the PLAYER changes the size, out of combat
+-- (that taint lasts until Blizzard re-reads the map itself, e.g. opening it in another zone).
+-- (Scaling the picture instead doesn't work: Blizzard's cursor math uses the window's scale.)
+function F:FitCanvas(cw, ch)
+    local sc = W.ScrollContainer
+    if not (cw and ch) then
+        ch = math.max(100, W:GetHeight() - (TITLE_H + TOOL_H + FOOT_H))
+        cw = ch * ASPECT
+    end
+    sc:ClearAllPoints()
+    sc:SetPoint("TOPLEFT", W, "TOPLEFT", PAD, -(TITLE_H + TOOL_H))
+    sc:SetSize(cw, ch)
+    -- Tell the canvas only when the size WE set changed (the player: Big / Small, the grip,
+    -- Reset). The first size needs no telling: Blizzard reads it on its first open (SetMapID).
+    if ui.lastCW and (math.abs(cw - ui.lastCW) > 0.5 or math.abs(ch - ui.lastCH) > 0.5) then
+        ui.canvasDirty = true
+    end
+    ui.lastCW, ui.lastCH = cw, ch
+    if ui.canvasDirty and W:IsShown() and not InCombatLockdown() then
+        ui.canvasDirty = nil
+        W:OnFrameSizeChanged()
+    end
+end
+
 function F:Layout()
     if not W or applying then return end
     applying = true
@@ -78,19 +112,11 @@ function F:Layout()
         end
     end
     W:SetSize(math.floor(w), math.floor(h))
-
+    local ch = math.floor(h) - chromeH
+    F:FitCanvas(ch * ASPECT, ch)
     local sc = W.ScrollContainer
-    sc:ClearAllPoints()
-    sc:SetPoint("TOPLEFT", W, "TOPLEFT", PAD, -(TITLE_H + TOOL_H))
-    sc:SetPoint("BOTTOMRIGHT", W, "BOTTOMRIGHT", -(PAD + side), FOOT_H)
-    sc:SetAlpha(c.mapAlpha or 1)
+    W.ScrollContainer:SetAlpha(c.mapAlpha or 1)
     if ui.backing then ui.backing:SetAlpha(c.mapAlpha or 1) end
-    -- Tell the canvas only when its size really changed: Blizzard resets the zoom on
-    -- every size change, so moving the window must not count as one.
-    local cw, ch = sc:GetSize()
-    if cw and ch and (math.abs(cw - (ui.toldW or 0)) > 0.5 or math.abs(ch - (ui.toldH or 0)) > 0.5) then
-        W:OnFrameSizeChanged()
-    end
 
     -- Blizzard's quest log stays "open" whenever Blizzard opens it (its own L / M logic and
     -- the objective tracker depend on that; hiding it from addon code would taint the
@@ -444,7 +470,8 @@ local function build()
     ui.tool = tool
     ui.floor = U.Button(tool, "Floor", nil, 20, nil, { "Floor", "This map has several levels." })
 
-    -- right side of the toolbar: zoom, then Blizzard's filter and pin buttons
+    -- right side of the toolbar: zoom, then Blizzard's filter and pin buttons (zooming from addon
+    -- code taints the map's zoom values; PinGuard.lua keeps that from blocking anything)
     ui.zoomIn = U.Button(tool, "+", 22, 20, function() W.ScrollContainer:ZoomIn() end, { "Zoom in" })
     ui.zoomIn:SetPoint("RIGHT", tool, "RIGHT", -6, 0)
     ui.zoomOut = U.Button(tool, "-", 22, 20, function() W.ScrollContainer:ZoomOut() end, { "Zoom out" })
@@ -525,7 +552,7 @@ local function build()
     end)
     tab:SetScript("OnLeave", function() tbg:SetColorTexture(U.BAR[1], U.BAR[2], U.BAR[3], 0.92); GameTooltip:Hide() end)
     ui.sideTab = tab
-    W:HookScript("OnSizeChanged", function() if sizing then W:OnFrameSizeChanged() end end)
+    W:HookScript("OnSizeChanged", function() if sizing then F:FitCanvas() end end)
 
     styleClose()
 end
@@ -583,10 +610,6 @@ M:OnReady(function()
         end)
     end
     if W.OnMapChanged then hooksecurefunc(W, "OnMapChanged", function() F:RefreshNav() end) end
-    -- remember what size the canvas was last told (by Blizzard or by us)
-    hooksecurefunc(W, "OnFrameSizeChanged", function()
-        ui.toldW, ui.toldH = W.ScrollContainer:GetSize()
-    end)
     -- quest details opened from the objective tracker: show them in our side area
     local D = W.QuestLog and W.QuestLog.DetailsFrame
     if D then
@@ -612,7 +635,14 @@ M:OnReady(function()
     local ev = CreateFrame("Frame")
     ev:RegisterEvent("DISPLAY_SIZE_CHANGED")
     ev:RegisterEvent("UI_SCALE_CHANGED")
-    ev:SetScript("OnEvent", function() if W:IsShown() then F:Layout() end end)
+    ev:RegisterEvent("PLAYER_REGEN_ENABLED")   -- a size change made in combat: tell the canvas now
+    ev:SetScript("OnEvent", function(_, event)
+        if event == "PLAYER_REGEN_ENABLED" then
+            if ui.canvasDirty and W:IsShown() then F:FitCanvas(ui.lastCW, ui.lastCH) end
+        elseif W:IsShown() then
+            F:Layout()
+        end
+    end)
 
     F:Layout()
     F:RefreshNav()
