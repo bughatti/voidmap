@@ -48,6 +48,10 @@ VoidMap gives the world map its own window. You keep the full navigation, the fi
 - Works in combat: the world map has no protected parts, so the window never blocks an action
 - With **TomTom**, VoidMap hides TomTom's coordinates on the map, because VoidMap shows its own at the bottom. TomTom's waypoints and arrow are unchanged
 
+## Credits
+
+- **WoW Forever zones and their areas** come from VoidDB. **VoidDB**, the game data the Void addons ship, is built from Blizzard's game data, finds shared by Void players, and open data: NorgannonDB by Maro, QuestieDB, pfQuest by Shagu, DungeonJournal by Exehn and CMaNGOS classic-db (GPL-3.0; pfQuest MIT). Full credits and licences: NOTICE.txt in the addon folder. Thank you to all of them.
+
 ---
 
-*Part of the Void addon family by Vede · MIT licensed · [Source & bug reports](https://github.com/bughatti/voidmap) · [All Void addons](https://www.curseforge.com/members/bughatti/projects) · free M+ & raid player lookups at [voidscout.io](https://voidscout.io) · more at [tinkerline.io](https://tinkerline.io/addons/voidmap/) · [Discord](https://discord.gg/7ZHmx7zMDh)*
+*Part of the Void addon family by Vede · GPL-3.0 licensed · [Source & bug reports](https://github.com/bughatti/voidmap) · [All Void addons](https://www.curseforge.com/members/bughatti/projects) · free M+ & raid player lookups at [voidscout.io](https://voidscout.io) · more at [tinkerline.io](https://tinkerline.io/addons/voidmap/) · [Discord](https://discord.gg/7ZHmx7zMDh)*

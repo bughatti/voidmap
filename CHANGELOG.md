@@ -1,5 +1,9 @@
 # VoidMap Changelog
 
+## 0.3.0 — 2026-11-15
+
+- **Licence: VoidMap is now GPL-3.0** (was MIT), because it ships WoW Forever area data from VoidDB, which includes GPL-3.0 open data. Credits in the README and in NOTICE.txt.
+
 ## 0.2.9 — 2026-11-13
 
 - **Fixed: "Interface action failed because of an AddOn" when you open the map in a fight.** After the map had been moved to another zone by an add-on (a quest list, a search box, Big / Small, the zoom buttons), opening it in combat made the game block part of placing each quest pin and name VoidMap (or another add-on) as the cause. VoidMap now keeps map pins from doing that in combat, whichever add-on touched the map first, and simply opening the map no longer leaves that trace in the first place.
