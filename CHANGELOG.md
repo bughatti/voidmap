@@ -1,5 +1,9 @@
 # VoidMap Changelog
 
+## 0.3.2 — 2026-11-20
+
+- Area names updated with WoW Forever's newest data.
+
 ## 0.3.1 — 2026-11-19
 
 - **The quest list stays in one order.** It used to rearrange itself for whatever map you were looking at, so quests jumped between headings after you clicked one. Now it always shows your quest log's headings A to Z, quests by level; quests on the map you're looking at just get a small dot.
