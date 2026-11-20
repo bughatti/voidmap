@@ -16,7 +16,7 @@ VoidMap gives the world map its own window. You keep the full navigation, the fi
 - **M**, **L** and **Esc** work as always
 
 ### Your quests beside the map
-- **On this map** first: the quests whose objectives are on the map you're looking at. Then the rest of your log under its zones
+- **Always in the same order**: your quest log's zones A to Z, quests by level, whatever map you look at. A small dot marks the quests on the map you're looking at
 - Coloured by level, with progress on the right and a mark on the quest you're tracking
 - **Hover** for the objectives (and the quest lights up on the map), **click** to read the whole quest (objectives, full text, rewards, with Track, Share and Abandon), **ctrl-click** to track it, **shift-click** to link it in chat, **right-click** to stop tracking it
 - The **arrow tab** on the map's right edge (or the **Quests** button) folds the list away, like Blizzard's map

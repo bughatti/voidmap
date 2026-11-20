@@ -1,8 +1,8 @@
 ----------------------------------------------------------------------
 -- Quests.lua — our quest list beside the map (replaces Blizzard's quest log panel).
 --
--- "On this map" first (quests whose objectives are on the map you're looking
--- at), then the rest of your log under its own headers. Level colors like the
+-- Your quest log under its own headers, in one order whatever map you look at; quests on the
+-- shown map get a small dot. Level colors like the
 -- quest log, progress on the right, the tracked quest marked.
 --   hover        highlights the quest on the map; tooltip with its objectives
 --   click        shows its map and the whole quest (QuestPage.lua); ctrl-click tracks it
@@ -46,37 +46,41 @@ local function onMap(mapID)
     return set
 end
 
+-- One order, whatever map you look at (the user, 2026-11-19: clicking a quest moved the map, an "On this map"
+-- group pulled quests out of their headings and others vanished: "it just needs to be consistant"). The list is
+-- your quest log's own headings in log order; quests on the shown map only get a dot (e.here), they never move.
+-- The game's own log order isn't stable either (after a /reload Uldaman and Zul'Farrak moved up between
+-- Stranglethorn and Sunken Temple, 2026-11-19), so we sort: headings A-Z, quests by level then name.
 local function build()
     entries = {}
     local here = onMap(W and W:GetMapID())
-    local hereList, rest = {}, {}
-    local header
+    local groups, names, header = {}, {}, nil
     for i = 1, C_QuestLog.GetNumQuestLogEntries() do
         local info = C_QuestLog.GetInfo(i)
         if info then
             if info.isHeader then
                 header = info.title
             elseif not info.isHidden and info.questID and info.questID > 0 then
-                local e = { qid = info.questID, title = info.title, level = info.level }
-                if here[info.questID] then
-                    hereList[#hereList + 1] = e
-                else
-                    rest[#rest + 1] = { header = header, e = e }
-                end
+                local h = header or "Other"
+                if not groups[h] then groups[h] = {}; names[#names + 1] = h end
+                local g = groups[h]
+                g[#g + 1] = { qid = info.questID, title = info.title, level = info.level,
+                    here = here[info.questID] or nil }
             end
         end
     end
-    if #hereList > 0 then
-        entries[#entries + 1] = { head = "On this map" }
-        for _, e in ipairs(hereList) do entries[#entries + 1] = e end
-    end
-    local last
-    for _, r in ipairs(rest) do
-        if r.header ~= last then
-            entries[#entries + 1] = { head = r.header or "Other" }
-            last = r.header
-        end
-        entries[#entries + 1] = r.e
+    -- "The Hinterlands" files under H, as the map names it
+    local function key(s) return (s:gsub("^The ", "")):lower() end
+    table.sort(names, function(a, b) return key(a) < key(b) end)
+    for _, h in ipairs(names) do
+        local g = groups[h]
+        table.sort(g, function(a, b)
+            if (a.level or 0) ~= (b.level or 0) then return (a.level or 0) < (b.level or 0) end
+            if (a.title or "") ~= (b.title or "") then return (a.title or "") < (b.title or "") end
+            return a.qid < b.qid
+        end)
+        entries[#entries + 1] = { head = h }
+        for _, e in ipairs(g) do entries[#entries + 1] = e end
     end
 end
 
@@ -94,6 +98,7 @@ local function showTooltip(row)
         end
     end
     if C_QuestLog.IsComplete(e.qid) then GameTooltip:AddLine("Ready to turn in.", 0.3, 1, 0.3) end
+    if e.here then GameTooltip:AddLine("On the map you're looking at (the dot).", 0, 0.78, 1) end
     GameTooltip:AddLine(" ")
     GameTooltip:AddLine("Click: read the whole quest and see its map", 0, 0.78, 1)
     GameTooltip:AddLine("Ctrl-click: track it · Shift-click: link in chat · Right-click: stop tracking", 0.55, 0.55, 0.6, true)
@@ -136,6 +141,10 @@ local function row(i)
     r.hl:SetAllPoints()
     r.mark = U.Fill(r, U.A[1], U.A[2], U.A[3], 1, "ARTWORK")
     r.mark:SetPoint("TOPLEFT", 0, -2); r.mark:SetPoint("BOTTOMLEFT", 0, 2); r.mark:SetWidth(2)
+    -- a small dot: this quest is on the map you're looking at
+    r.here = U.Fill(r, U.A[1], U.A[2], U.A[3], 0.9, "ARTWORK")
+    r.here:SetSize(4, 4)
+    r.here:SetPoint("LEFT", 3, 0)
     r.title = U.Text(r, 11)
     r.title:SetPoint("LEFT", 8, 0)
     r.prog = U.Text(r, 10)
@@ -170,6 +179,7 @@ function Q:Refresh()
         else
             r:Show()
             r.mark:SetShown(e.qid and e.qid == tracked or false)
+            r.here:SetShown(e.here and not (e.qid == tracked) or false)
             if e.head then
                 r.title:SetText(e.head)
                 r.title:SetTextColor(U.A[1], U.A[2], U.A[3])
