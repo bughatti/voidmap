@@ -1,5 +1,9 @@
 # VoidMap Changelog
 
+## 0.3.4 — 2026-11-21
+
+- **Fixed on WoW Forever: per-character settings.** The game stopped telling addons your realm's name, so your character's own settings were no longer loaded or saved. They are again, from where they were saved before.
+
 ## 0.3.3 — 2026-11-21
 
 - **Works next to Questie.** The "place a map pin" button stays in VoidMap's toolbar (Questie's map buttons kept moving it onto the title bar), and VoidMap's fix for map-pin errors in combat no longer touches Questie's own pins.
