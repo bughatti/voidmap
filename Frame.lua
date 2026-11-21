@@ -483,6 +483,17 @@ local function build()
     end
     if restyle(ui.pin, "Pin") then
         ui.pin:SetPoint("RIGHT", anchor, "LEFT", -3, 0)
+        -- Questie's Krowi_WorldMapButtons takes this button too and re-anchors it on every map change, which
+        -- dropped it on our title bar (the user, 2026-11-21: Questie next to our addons). It goes back in the
+        -- toolbar whenever anything else moves it.
+        local pinAnchor = anchor
+        hooksecurefunc(ui.pin, "SetPoint", function(self)
+            if self.vmPlacing then return end
+            self.vmPlacing = true
+            self:ClearAllPoints()
+            self:SetPoint("RIGHT", pinAnchor, "LEFT", -3, 0)
+            self.vmPlacing = nil
+        end)
         hooksecurefunc(ui.pin, "SetActive", function(self, on)
             self.vmActive = on
             self.vmBg:SetColorTexture(on and A[1] * 0.35 or 0.10, on and A[2] * 0.35 or 0.12, on and A[3] * 0.35 or 0.15, 1)

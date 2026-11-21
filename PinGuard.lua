@@ -36,18 +36,26 @@ for _, m in ipairs(GUARDED) do
     end
 end
 
-local patched = {}   -- pin -> true while it carries the guards
+-- pin -> { [method] = true } for the guards WE put on it
+-- Only a pin still on the frame's own method gets a guard: another addon's pin with its own copy (Questie's
+-- HereBeDragons pins carry a do-nothing SetPassThroughButtons for the same reason) is left alone, and only
+-- our guards come off again (the user, 2026-11-21: Questie next to our addons; removing Questie's copy
+-- after the first fight was us touching pins we didn't make).
+local patched = {}
 local function patch(pin)
     if type(pin) ~= "table" or patched[pin] then return end
+    local mine = {}
     for m, f in pairs(guard) do
-        if pin[m] then pin[m] = f end
+        if pin[m] and rawget(pin, m) == nil then pin[m] = f; mine[m] = true end
     end
-    patched[pin] = true
+    patched[pin] = mine
 end
 
 local function unpatchAll()
-    for pin in pairs(patched) do
-        for m in pairs(guard) do pin[m] = nil end   -- back to the frame's own method
+    for pin, mine in pairs(patched) do
+        for m in pairs(mine) do
+            if rawget(pin, m) == guard[m] then pin[m] = nil end   -- back to the frame's own method
+        end
     end
     wipe(patched)
     -- now out of combat: give pins placed in combat the mouse settings Blizzard asked for

@@ -1,5 +1,9 @@
 # VoidMap Changelog
 
+## 0.3.3 — 2026-11-21
+
+- **Works next to Questie.** The "place a map pin" button stays in VoidMap's toolbar (Questie's map buttons kept moving it onto the title bar), and VoidMap's fix for map-pin errors in combat no longer touches Questie's own pins.
+
 ## 0.3.2 — 2026-11-20
 
 - Area names updated with WoW Forever's newest data.
