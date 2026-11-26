@@ -289,3 +289,11 @@ VoidHubLaunchers.VoidMap = {
     icon = "Interface\\Icons\\INV_Misc_Map_01",
     onClick = function() S:Toggle() end,
 }
+
+-- Read-only hooks for the all-in-one VoidHub window (2026-11-24): the hub's World map settings page reads and
+-- writes the same config (M:Config) and calls the same map functions as this window. Nothing here changes it.
+M.Hub = {
+    Config = cfg, Apply = applyMap,
+    ToggleQuests = function() if ns.Frame then ns.Frame:ToggleQuests() end end,
+    ResetGeo = function() if ns.Frame then ns.Frame:ResetGeo() end end,
+}
